@@ -44,7 +44,7 @@ all: OpenGLApplication.exe
 OpenGLApplication.exe: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cygwin C++ Linker'
-	g++  -o "OpenGLApplication.exe" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"C:\Users\Christopher\Documents\glut-3.7\lib\glut" -o "OpenGLApplication.exe" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
