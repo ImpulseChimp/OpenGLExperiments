@@ -1,4 +1,9 @@
+#define GLEW_STATIC
+#include <GL/glew.h>
 #include <GL/glut.h>
+#include <GLM/glm.hpp>
+
+using namespace glm;
 
 void displayMe(void)
 {
