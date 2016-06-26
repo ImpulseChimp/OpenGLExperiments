@@ -19,7 +19,7 @@
 							<builder buildPath="${workspace_loc:/OpenGLApplication}/Debug" id="cdt.managedbuild.tool.gnu.builder.mingw.base.1050849312" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.1245895569" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug">
 								<option id="gnu.both.asm.option.include.paths.1626188691" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;C:\MinGW\freeglut\include\GL&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\Users\Christopher\workspace\OpenGLApplication\Dependencies\Include&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.632976607" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -37,7 +37,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug.1482435230" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug.892477030" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.debug">
 								<option id="gnu.cpp.link.option.paths.1728512098" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;C:\MinGW\freeglut\lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\Users\Christopher\workspace\OpenGLApplication\Dependencies\Libs&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1130418814" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="freeglut"/>
