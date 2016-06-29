@@ -6,8 +6,11 @@ private:
 	PlayerState state = STANDING;
 	float moveSpeed = 0.05f;
 	float* playerVertexArray;
+	int jumpStart = 0;
 
 public:
+	float velocity = 3;
+
 	Player(int x, int y, int width, int height)
 	{
 		playerVertexArray = new float[9];
@@ -30,13 +33,40 @@ public:
 		playerVertexArray[6] -= moveSpeed;
 	}
 
-	void jump()
+	void modifyVertical(float moveSpeed)
+	{
+		playerVertexArray[1] += moveSpeed;
+		playerVertexArray[4] += moveSpeed;
+		playerVertexArray[7] += moveSpeed;
+
+		if (playerVertexArray[1] < -1 || playerVertexArray[4] < -1 || playerVertexArray[7] < -1)
+		{
+			playerVertexArray[1] = -1;
+			playerVertexArray[4] = -1;
+			playerVertexArray[7] = -1;
+			state = STANDING;
+		}
+	}
+
+	void updateJump(int time)
+	{
+		float calculationTime = (time - jumpStart) / 1000.0f;
+		modifyVertical(velocity*calculationTime + (0.5f * -1 * calculationTime * calculationTime));
+	}
+
+	void jump(int startTime)
 	{
 		state = JUMPING;
+		jumpStart = startTime;
 	}
 
 	float* getVertexArray()
 	{
 		return playerVertexArray;
+	}
+
+	PlayerState getState()
+	{
+		return state;
 	}
 };
