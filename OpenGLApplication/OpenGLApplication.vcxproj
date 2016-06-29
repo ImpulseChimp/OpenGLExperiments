@@ -116,10 +116,12 @@
   <ItemGroup>
     <ClInclude Include="LoadShaders.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="PlayerStates.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LoadShaders.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
