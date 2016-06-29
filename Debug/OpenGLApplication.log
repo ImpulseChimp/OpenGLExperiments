@@ -1,0 +1,8 @@
+﻿  main.cpp
+c:\users\christopher\documents\visual studio 2015\projects\openglapplication\openglapplication\main.cpp(34): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\christopher\documents\visual studio 2015\projects\openglapplication\openglapplication\main.cpp(36): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\christopher\documents\visual studio 2015\projects\openglapplication\openglapplication\main.cpp(109): warning C4838: conversion from 'double' to 'GLfloat' requires a narrowing conversion
+c:\users\christopher\documents\visual studio 2015\projects\openglapplication\openglapplication\main.cpp(109): warning C4305: 'initializing': truncation from 'double' to 'GLfloat'
+c:\users\christopher\documents\visual studio 2015\projects\openglapplication\openglapplication\main.cpp(152): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+  OpenGLApplication.vcxproj -> C:\Users\Christopher\documents\visual studio 2015\Projects\OpenGLApplication\Debug\OpenGLApplication.exe
+  OpenGLApplication.vcxproj -> C:\Users\Christopher\documents\visual studio 2015\Projects\OpenGLApplication\Debug\OpenGLApplication.pdb (Partial PDB)
