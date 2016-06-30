@@ -135,9 +135,9 @@ void redrawScreen(GLFWwindow* window)
 	glBindVertexArray(vaoID[Triangles]);
 
 	int time = 4;
-	mat4 translate = translate(mat4(), vec3(sin(time), 0, 0.02f));
-	mat4 rotate = rotate(mat4(), time * 3.14159 * 0.2f, vec3(0, 0, 1));
-	mat4 scale = scale(mat4(), vec3(1.0f - 0.2f));
+	mat4 translate = glm::translate(mat4(), vec3((float)sin(time), 0.0f, 0.02f));
+	mat4 rotate = glm::rotate(mat4(), time * 3.14159f * 0.2f, vec3(0, 0, 1));
+	mat4 scale = glm::scale(mat4(), vec3(1.0f - 0.2f));
 
 	mat4 model = translate * rotate * scale;
 	glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
