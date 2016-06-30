@@ -19,10 +19,12 @@ int getCurrentTime();
 void windowResizeCallback(GLFWwindow* window, int width, int height);
 void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mode);
 
+bool runGame = true;
+
 GLfloat test[] = {
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, 1.0f, -1.0f,
-	1.0f, 1.0f, -1.0f
+	-0.5f, -0.5f, 0.0f,
+	 0.5f, -0.5f, 0.0f,
+	 0.0f,  0.5f, 0.0f
 };
 
 enum VAO_IDs { Triangles = 0, VAOSize = 1 };
@@ -54,21 +56,15 @@ int main() {
 	initializeDependencies();
 	player = new Player(-1, -1, 1, 1);
 
-	bool runGame = true;
 	double previous = getCurrentTime();
 	double lag = 0.0;
 	double current = 0;
 	double elapsed = 0;
 
-	int secondCounter = 0;
-	int fps = 0;
-
-
 	while (runGame)
 	{
 		current = getCurrentTime();
 		elapsed = current - previous;
-		secondCounter += elapsed;
 		previous = current;
 		lag += elapsed;
 
@@ -81,17 +77,6 @@ int main() {
 		}
 
 		redrawScreen(window);
-		fps++;
-
-		if (secondCounter > 1000)
-		{
-			secondCounter = 0;
-			char title[256];
-			title[255] = '\0';
-			snprintf(title, 255, "%s %s - [FPS: %d]", "Name", "Version", fps);
-			glfwSetWindowTitle(window, title);
-			fps = 0;
-		}
 	}
 
 	glfwTerminate();
@@ -100,12 +85,13 @@ int main() {
 
 void initializeDependencies(void) {
 
-	glClearColor(0, 1, 0, 1);
 
 	glGenVertexArrays(VAOSize, &vaoID[Triangles]);
 	glBindVertexArray(vaoID[Triangles]);
 
 	glGenBuffers(VBOSize, &vboID[ArrayBuffer]);
+	glBindBuffer(GL_ARRAY_BUFFER, vboID[ArrayBuffer]);
+	glBufferData(GL_ARRAY_BUFFER, 12 * 3 * sizeof(GLfloat), test, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[ArrayBuffer]);
 
 	glEnableVertexAttribArray(0);
@@ -121,55 +107,16 @@ void initializeDependencies(void) {
 	glUseProgram(program);
 }
 
-void initilizeWindow()
-{
-	if (!glfwInit()) {
-		fprintf(stderr, "ERROR: could not start GLFW3\n");
-		exit(-1);
-	}
-
-	window = glfwCreateWindow(windowWidth, windowHeight, "Shark Week", NULL, NULL);
-	if (!window) {
-		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
-		glfwTerminate();
-		exit(-1);
-	}
-	glfwMakeContextCurrent(window);
-
-	glewExperimental = GL_TRUE;
-	glewInit();
-
-	const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-	const GLubyte* version = glGetString(GL_VERSION); // version as a string
-	printf("Renderer: %s\n", renderer);
-	printf("OpenGL version supported %s\n", version);
-
-	// tell GL to only draw onto a pixel if the shape is closer to the viewervoid 
-	gluPerspective(120, 16, 1.0f, 100.0f);
-
-	glEnable(GL_DEPTH_TEST); // enable depth-testing
-	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
-	glfwSetKeyCallback(window, handleKeyboardInput);
-	glfwSetWindowSizeCallback(window, windowResizeCallback);
-}
 
 void redrawScreen(GLFWwindow* window)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glLoadIdentity();
-	//gluLookAt(6.0f, 6.0f, 6.0f,
-	//		  0.0f, 1.0f, 0.0f,
-	//          0.0f, 1.0f, 0.0f);
 
-	glLoadIdentity();
-	drawRectangle(test);
-
-
-	//gluLookAt(10.0, 10.0, 10.0, 1.5, -1.0, 1.5, 0.0, 0.0, 1.0);
-	//drawRectangle(player->getVertexArray());
+	glBindVertexArray(vaoID[Triangles]);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glBindVertexArray(0);
 
 	glfwSwapBuffers(window);
-	glTranslatef(0.0, 0.0, -10.5);
 	glFlush();
 }
 
@@ -180,13 +127,6 @@ void updateGameState()
 int getCurrentTime()
 {
 	return glfwGetTime();
-}
-
-void drawRectangle(float* vertArray)
-{
-	glBufferData(GL_ARRAY_BUFFER, 12 * 3 * sizeof(GLfloat), vertArray, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID[ArrayBuffer]);
-	glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 }
 
 void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -207,4 +147,43 @@ void windowResizeCallback(GLFWwindow* window, int width, int height)
 {
 	glfwSetWindowSize(window, width, height);
 	glViewport(0, 0, width, height);
+}
+
+void initilizeWindow()
+{
+	//Initilize GLFW
+	if (!glfwInit()) {
+		fprintf(stderr, "ERROR: could not start GLFW3\n");
+		exit(-1);
+	}
+
+	window = glfwCreateWindow(windowWidth, windowHeight, "Shark Week", NULL, NULL);
+	if (!window) {
+		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
+		glfwTerminate();
+		exit(-1);
+	}
+
+	//Set GLFW Callbacks
+	glfwMakeContextCurrent(window);
+	glfwSetKeyCallback(window, handleKeyboardInput);
+	glfwSetWindowSizeCallback(window, windowResizeCallback);
+
+	//Setup and initilize GLEW
+	glewExperimental = GL_TRUE;
+	!glewInit();
+
+	//Set initial OpenGL settings
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glLineWidth(3);
+	glClearColor(0.2f, 0.2f, 0.2f, 1);
+
+	//Print Startup Info
+	const GLubyte* renderer = glGetString(GL_RENDERER);
+	const GLubyte* version = glGetString(GL_VERSION);
+	printf("Renderer: %s\n", renderer);
+	printf("OpenGL version supported %s\n", version);
 }
