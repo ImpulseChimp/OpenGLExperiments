@@ -1,4 +1,5 @@
 #include <GL/glew.h>
+#include <GL/GLU.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -11,20 +12,23 @@ using namespace glm;
 
 void initilizeWindow();
 void initializeDependencies(void);
-void drawTriangle(float* vertArray);
+void drawRectangle(float* vertArray);
 void redrawScreen(GLFWwindow* window);
 void updateGameState();
 int getCurrentTime();
 void windowResizeCallback(GLFWwindow* window, int width, int height);
 void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mode);
 
-float* vertices = new float[9];
+GLfloat test[] = {
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f
+};
+
 enum VAO_IDs { Triangles = 0, VAOSize = 1 };
 enum Buffer_IDs { ArrayBuffer = 0, VBOSize = 1};
-enum Attrib_IDs { vPosition = 0, vOffset = 6 };
+enum Attrib_IDs { vPosition = 0 };
 enum Game_Loop { MS_PER_UPDATE = 16 };
-
-float acceleration = -9.8;
 
 Player* player;
 
@@ -38,7 +42,6 @@ GLFWwindow* window;
 
 GLuint vertexArrays[VAOSize];
 GLuint buffers[VBOSize];
-const GLuint VerticesCount = 6;
 bool isFullscreen = false;
 
 float aspectRatio = 16.0f / 9.0f;
@@ -59,6 +62,7 @@ int main() {
 
 	int secondCounter = 0;
 	int fps = 0;
+
 
 	while (runGame)
 	{
@@ -140,7 +144,9 @@ void initilizeWindow()
 	printf("Renderer: %s\n", renderer);
 	printf("OpenGL version supported %s\n", version);
 
-	// tell GL to only draw onto a pixel if the shape is closer to the viewer
+	// tell GL to only draw onto a pixel if the shape is closer to the viewervoid 
+	gluPerspective(120, 16, 1.0f, 100.0f);
+
 	glEnable(GL_DEPTH_TEST); // enable depth-testing
 	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
 	glfwSetKeyCallback(window, handleKeyboardInput);
@@ -150,21 +156,25 @@ void initilizeWindow()
 void redrawScreen(GLFWwindow* window)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glLoadIdentity();
+	//gluLookAt(6.0f, 6.0f, 6.0f,
+	//		  0.0f, 1.0f, 0.0f,
+	//          0.0f, 1.0f, 0.0f);
 
-	drawTriangle(player->getVertexArray());
+	glLoadIdentity();
+	drawRectangle(test);
+
+
+	//gluLookAt(10.0, 10.0, 10.0, 1.5, -1.0, 1.5, 0.0, 0.0, 1.0);
+	//drawRectangle(player->getVertexArray());
 
 	glfwSwapBuffers(window);
+	glTranslatef(0.0, 0.0, -10.5);
 	glFlush();
 }
 
 void updateGameState()
 {
-	float time = 3;
-
-	if (player->getState() == JUMPING)
-	{
-		player->updateJump(getCurrentTime());
-	}
 }
 
 int getCurrentTime()
@@ -172,11 +182,11 @@ int getCurrentTime()
 	return glfwGetTime();
 }
 
-void drawTriangle(float* vertArray)
+void drawRectangle(float* vertArray)
 {
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), vertArray, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 12 * 3 * sizeof(GLfloat), vertArray, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[ArrayBuffer]);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 }
 
 void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -184,14 +194,11 @@ void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, 
 	switch (key) 
 	{
 	case GLFW_KEY_D:
-		player->moveRight();
 		break;
 	case GLFW_KEY_A:
-		player->moveLeft();
 		break;
 	case GLFW_KEY_SPACE:
 		if (action == GLFW_PRESS)
-			player->jump(getCurrentTime());
 		break;
 	}
 }
@@ -199,4 +206,5 @@ void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, 
 void windowResizeCallback(GLFWwindow* window, int width, int height)
 {
 	glfwSetWindowSize(window, width, height);
+	glViewport(0, 0, width, height);
 }

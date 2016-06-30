@@ -1,1 +1,1 @@
-enum PlayerState { JUMPING, STANDING };
+enum PlayerState { ACTIVE, IDLE };
