@@ -2,6 +2,8 @@
 #include <GL/GLU.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <stdio.h>
 #include "player.cpp"
@@ -12,12 +14,16 @@ using namespace glm;
 
 void initilizeWindow();
 void initializeDependencies(void);
-void drawRectangle(float* vertArray);
 void redrawScreen(GLFWwindow* window);
 void updateGameState();
 int getCurrentTime();
 void windowResizeCallback(GLFWwindow* window, int width, int height);
 void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mode);
+
+int orthoId;
+GLint modelMatrixId;
+GLint viewMatrixId;
+GLint projectionMatrixId;
 
 bool runGame = true;
 
@@ -105,6 +111,11 @@ void initializeDependencies(void) {
 
 	GLuint program = LoadShaders(shaders);
 	glUseProgram(program);
+
+	orthoId = glGetUniformLocation(program, "ortho");
+	modelMatrixId = glGetUniformLocation(program, "modelMatrix");
+	viewMatrixId = glGetUniformLocation(program, "viewMatrix");
+	projectionMatrixId = glGetUniformLocation(program, "projectionMatrix");
 }
 
 
@@ -112,7 +123,24 @@ void redrawScreen(GLFWwindow* window)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glm::mat4 ortho = glm::ortho(-aspectRatio, aspectRatio, -1.f, 1.f, -1.f, 1.f);
+	glUniformMatrix4fv(orthoId, 1, GL_FALSE, value_ptr(ortho));
+
+	mat4 view = lookAt(vec3(0, 0, 2), vec3(0, 0, 0), vec3(0, 1, 0));
+	mat4 projection = perspective(3.14159f/3.0f, aspectRatio, 0.1f, -10.0f);
+
+	glUniformMatrix4fv(viewMatrixId, 1, GL_FALSE, value_ptr(view));
+	glUniformMatrix4fv(projectionMatrixId, 1, GL_FALSE, value_ptr(projection));
+
 	glBindVertexArray(vaoID[Triangles]);
+
+	mat4 translate
+		mat4 rotate = rotate(mat4(), time * 3.14159 * 0.2f);
+		mat4 scale = scale(mat4(), vec3(1.0f - 0.2f));
+
+	mat4 model = translate * rotate * scale;
+	glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
+
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glBindVertexArray(0);
 
