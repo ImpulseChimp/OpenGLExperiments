@@ -64,6 +64,8 @@ int renderModes[] = {GL_TRIANGLES, GL_LINES, GL_POINTS};
 float stepSpeed = 0.005f;
 float animationTime = 0;
 
+float xRotation = 0;
+
 int main() {
 
 	initilizeWindow();
@@ -163,7 +165,7 @@ void redrawScreen(GLFWwindow* window)
 	for (int i = 0; i < 100; ++i)
 	{
 		mat4 translate = glm::translate(mat4(), vec3((float)sin(animationTime), 0.0f, (float)i/100));
-		mat4 rotate = glm::rotate(mat4(), animationTime * 3.14159f * (float)i / 100, vec3(0, 0, 1));
+		mat4 rotate = glm::rotate(mat4(), animationTime * 3.14159f * (float)i / 100, vec3(xRotation, 0, 1));
 		mat4 scale = glm::scale(mat4(), vec3(1.0f - (float)i / 100));
 
 		mat4 model = translate * rotate * scale;
@@ -208,6 +210,9 @@ void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, 
 			else
 				renderSelection--;
 		}
+		break;
+	case GLFW_KEY_RIGHT:;
+		xRotation += 0.01;
 		break;
 	case GLFW_KEY_ESCAPE:
 		runGame = false;
