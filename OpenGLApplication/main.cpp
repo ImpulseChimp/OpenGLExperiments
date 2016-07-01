@@ -19,6 +19,8 @@ void updateGameState();
 int getCurrentTime();
 void windowResizeCallback(GLFWwindow* window, int width, int height);
 void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mode);
+static void handleCursorInput(GLFWwindow* window, double xpos, double ypos);
+void handleScrollInput(GLFWwindow* window, double xoffset, double yoffset);
 
 float time = 0;
 int orthoId;
@@ -61,10 +63,25 @@ float windowWidth = windowHeight * aspectRatio;
 int renderSelection = 0;
 int renderModes[] = {GL_TRIANGLES, GL_LINES, GL_POINTS};
 
-float stepSpeed = 0.005f;
+int functionSelection = 0;
+enum algorithmModes { TRIANGLE_FRACTAL, TRIANGLE_ARMY, SQUARE_WAVE };
+int functionModes[] = { TRIANGLE_FRACTAL, TRIANGLE_ARMY, SQUARE_WAVE };
+
+float stepSpeed = 0.0005f;
 float animationTime = 0;
 
 float xRotation = 0;
+float yRotation = 0;
+float zOffset = 0;
+double previousMouseX = 0;
+double previousMouseY = 0;
+
+int renderCount = 100;
+int verticesRendered = 3;
+
+float oldStepSpeed = 0;
+
+
 
 int main() {
 
@@ -105,7 +122,7 @@ int main() {
 
 			char title[256];
 			title[255] = '\0';
-			snprintf(title, 255, "%s - [FPS: %d]", "Fractals: ", fps);
+			snprintf(title, 255, "%s - [FPS: %d][Rendered: %d]", "Fractals: ", fps, renderCount);
 			glfwSetWindowTitle(window, title);
 
 			fps = 0;
@@ -126,9 +143,6 @@ void initializeDependencies(void) {
 	glBufferData(GL_ARRAY_BUFFER, 12 * 3 * sizeof(GLfloat), test, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[ArrayBuffer]);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
 	ShaderInfo shaders[] = {
 		{ GL_VERTEX_SHADER, "C:\\Users\\Christopher\\Documents\\visual studio 2015\\Projects\\OpenGLApplication\\OpenGLApplication\\triangles.vert" },
 		{ GL_FRAGMENT_SHADER, "C:\\Users\\Christopher\\Documents\\visual studio 2015\\Projects\\OpenGLApplication\\OpenGLApplication\\triangles.frag" },
@@ -138,11 +152,15 @@ void initializeDependencies(void) {
 	GLuint program = LoadShaders(shaders);
 	glUseProgram(program);
 
+	int positionId = glGetUniformLocation(program, "vPosition");
 	orthoId = glGetUniformLocation(program, "ortho");
 	colorId = glGetUniformLocation(program, "color");
 	modelMatrixId = glGetUniformLocation(program, "modelMatrix");
 	viewMatrixId = glGetUniformLocation(program, "viewMatrix");
 	projectionMatrixId = glGetUniformLocation(program, "projectionMatrix");
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
 
@@ -162,16 +180,49 @@ void redrawScreen(GLFWwindow* window)
 
 	glBindVertexArray(vaoID[Triangles]);
 
-	for (int i = 0; i < 100; ++i)
+	if (functionModes[functionSelection] == TRIANGLE_FRACTAL)
 	{
-		mat4 translate = glm::translate(mat4(), vec3((float)sin(animationTime), 0.0f, (float)i/100));
-		mat4 rotate = glm::rotate(mat4(), animationTime * 3.14159f * (float)i / 100, vec3(xRotation, 0, 1));
-		mat4 scale = glm::scale(mat4(), vec3(1.0f - (float)i / 100));
+		for (int i = 0; i < renderCount; ++i)
+		{
+			mat4 translate = glm::translate(mat4(), vec3(0, 0, ((float)i/100) - 1));
+			mat4 rotate = glm::rotate(mat4(), animationTime * 3.14159f * (float)i / 100, vec3(0, 0, 1));
+			mat4 scale = glm::scale(mat4(), vec3((float)i / 100));
 
-		mat4 model = translate * rotate * scale;
-		glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
+			mat4 model = translate * rotate * scale;
+			glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
 
-		glDrawArrays(renderModes[renderSelection], 0, 3);
+			glDrawArrays(renderModes[renderSelection], 0, verticesRendered);
+		}
+	}
+	else if (functionModes[functionSelection] == TRIANGLE_ARMY)
+	{
+		for (int i = 0; i < renderCount; ++i)
+		{
+			float waveOffset = sin((animationTime + (float)i / (float)renderCount)) + 0.5f;
+
+			mat4 translate = glm::translate(mat4(), vec3((float)i / (float)renderCount, waveOffset, 0));
+			mat4 rotate = glm::rotate(mat4(), 0.0f, vec3(0, 0, 1));
+			mat4 scale = glm::scale(mat4(), vec3((float)i / 100));
+
+			mat4 model = translate * rotate * scale;
+			glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
+
+			glDrawArrays(renderModes[renderSelection], 0, verticesRendered);
+		}
+	}
+	else if (functionModes[functionSelection] == SQUARE_WAVE)
+	{
+		for (int i = 0; i < renderCount; ++i)
+		{
+			mat4 translate = glm::translate(mat4(), vec3(xRotation, yRotation, (float)i / 100));
+			mat4 rotate = glm::rotate(mat4(), animationTime * 3.14159f * (float)i / 100, vec3(xRotation, yRotation, 1));
+			mat4 scale = glm::scale(mat4(), vec3(zOffset - (float)i / 100));
+
+			mat4 model = translate * rotate * scale;
+			glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
+
+			glDrawArrays(renderModes[renderSelection], 0, 3);
+		}
 	}
 
 	glBindVertexArray(0);
@@ -212,18 +263,58 @@ void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, 
 		}
 		break;
 	case GLFW_KEY_RIGHT:;
-		xRotation += 0.01;
+		if (action == GLFW_PRESS)
+		{
+			if (functionSelection + 1 > 2)
+				functionSelection = 0;
+			else
+				functionSelection++;
+		}
+		break;
+	case GLFW_KEY_LEFT:;
+		if (action == GLFW_PRESS)
+		{
+			if (functionSelection - 1 < 0)
+				functionSelection = 2;
+			else
+				functionSelection--;
+		}
 		break;
 	case GLFW_KEY_ESCAPE:
 		runGame = false;
+		break;
+	case GLFW_KEY_S:
+		    renderCount++;
+		break;
+	case GLFW_KEY_A:
+		    renderCount--;
+		break;
+	case GLFW_KEY_W:
+		if (action == GLFW_PRESS)
+			verticesRendered++;
+		break;
+	case GLFW_KEY_Q:
+		if (action == GLFW_PRESS)
+			verticesRendered--;
+		break;
+	case GLFW_KEY_EQUAL:
+		stepSpeed += 0.0001;
+		break;
+	case GLFW_KEY_MINUS:
+		stepSpeed -= 0.0001;
 		break;
 	case GLFW_KEY_SPACE:
 		if (action == GLFW_PRESS)
 		{
 			if (stepSpeed == 0)
-				stepSpeed = 0.005f;
+			{
+				stepSpeed = oldStepSpeed;
+			}
 			else
+			{
+				oldStepSpeed = stepSpeed;
 				stepSpeed = 0;
+			}
 		}
 		break;
 	}
@@ -234,6 +325,18 @@ void windowResizeCallback(GLFWwindow* window, int width, int height)
 	glfwSetWindowSize(window, width, height);
 	glViewport(0, 0, width, height);
 }
+
+static void handleCursorInput(GLFWwindow* window, double xpos, double ypos)
+{
+	xRotation = xpos/600.0f;
+	yRotation = ypos/400.0f;
+}
+
+void handleScrollInput(GLFWwindow* window, double xoffset, double yoffset)
+{
+	zOffset += yoffset;
+}
+
 
 void initilizeWindow()
 {
@@ -254,6 +357,8 @@ void initilizeWindow()
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, handleKeyboardInput);
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
+	glfwSetCursorPosCallback(window, handleCursorInput);
+	glfwSetScrollCallback(window, handleScrollInput);
 
 	//Setup and initilize GLEW
 	glewExperimental = GL_TRUE;
