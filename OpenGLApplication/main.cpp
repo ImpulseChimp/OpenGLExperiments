@@ -37,7 +37,55 @@ GLfloat test[] = {
 	 0.0f,  0.5f, 0.0f
 };
 
-enum VAO_IDs { Triangles = 0, VAOSize = 1 };
+GLfloat square[] = {
+	-0.5f, -0.5f, 0.0f,
+	 0.5f, -0.5f, 0.0f,
+ 	 0.5f,  0.5f, 0.0f,
+	-0.5f, -0.5f, 0.0f,
+	 0.5f,  0.5f, 0.0f,
+	-0.5f,  0.5f, 0.0f
+};
+
+GLfloat shark[] = {
+	0.0f, 0.0f, 0.0f,
+	0.3f, 0.0f, 0.0f,
+	0.3f,  0.5f, 0.0f,
+
+	-0.5f, -0.5f, 0.0f,
+	0.5f, 0.0f, 0.0f,
+	-0.5f,  0.0f, 0.0f,
+
+	-0.5f, -0.5f, 0.0f,
+	0.5f, -0.5f, 0.0f,
+	0.5f, 0.0f, 0.0f,
+
+	-0.8f, -0.25f, 0.0f,
+	-0.5f,  0.0f, 0.0f,
+	-0.8f,  0.0f, 0.0f,
+
+	-0.8f, -0.25f, 0.0f,
+	-0.5f,  -0.25f, 0.0f,
+	-0.5f,  0.0f, 0.0f,
+
+	0.5f, 0.0f, 0.0f,
+	0.5f, -0.5f, 0.0f,
+	0.75f, -0.25f, 0.0f,
+
+	1.0f, 0.0f, 0.0f,
+	1.0f, -0.5f, 0.0f,
+	0.75f, -0.25f, 0.0f,
+
+	-0.8f, -0.75f, 0.0f,
+	-0.5f,  -0.5f, 0.0f,
+	-0.8f,  -0.5f, 0.0f,
+
+	-0.8f, -0.75f, 0.0f,
+	-0.5f,  -0.75f, 0.0f,
+	-0.5f,  -0.5f, 0.0f,
+
+};
+
+enum VAO_IDs { Triangles = 0, VAOSize = 1, Squares = 2};
 enum Buffer_IDs { ArrayBuffer = 0, VBOSize = 1};
 enum Attrib_IDs { vPosition = 0 };
 enum Game_Loop { MS_PER_UPDATE = 16 };
@@ -81,8 +129,6 @@ int verticesRendered = 3;
 
 float oldStepSpeed = 0;
 
-
-
 int main() {
 
 	initilizeWindow();
@@ -122,7 +168,7 @@ int main() {
 
 			char title[256];
 			title[255] = '\0';
-			snprintf(title, 255, "%s - [FPS: %d][Rendered: %d]", "Fractals: ", fps, renderCount);
+			snprintf(title, 255, "%s - [FPS: %d][Rendered: %d][Points: %d]", "Fractals: ", fps, renderCount, verticesRendered);
 			glfwSetWindowTitle(window, title);
 
 			fps = 0;
@@ -139,7 +185,6 @@ void initializeDependencies(void) {
 	glBindVertexArray(vaoID[Triangles]);
 
 	glGenBuffers(VBOSize, &vboID[ArrayBuffer]);
-	glBindBuffer(GL_ARRAY_BUFFER, vboID[ArrayBuffer]);
 	glBufferData(GL_ARRAY_BUFFER, 12 * 3 * sizeof(GLfloat), test, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[ArrayBuffer]);
 
@@ -163,7 +208,6 @@ void initializeDependencies(void) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
-
 void redrawScreen(GLFWwindow* window)
 {
 	animationTime += stepSpeed;
@@ -182,6 +226,8 @@ void redrawScreen(GLFWwindow* window)
 
 	if (functionModes[functionSelection] == TRIANGLE_FRACTAL)
 	{
+		glLineWidth(1);
+		glBufferData(GL_ARRAY_BUFFER, 12 * 3 * sizeof(GLfloat), test, GL_STATIC_DRAW);
 		for (int i = 0; i < renderCount; ++i)
 		{
 			mat4 translate = glm::translate(mat4(), vec3(0, 0, ((float)i/100) - 1));
@@ -196,33 +242,40 @@ void redrawScreen(GLFWwindow* window)
 	}
 	else if (functionModes[functionSelection] == TRIANGLE_ARMY)
 	{
+		glLineWidth(10);
+		glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(GLfloat), square, GL_STATIC_DRAW);
+
 		for (int i = 0; i < renderCount; ++i)
 		{
 			float waveOffset = sin((animationTime + (float)i / (float)renderCount)) + 0.5f;
 
-			mat4 translate = glm::translate(mat4(), vec3((float)i / (float)renderCount, waveOffset, 0));
-			mat4 rotate = glm::rotate(mat4(), 0.0f, vec3(0, 0, 1));
-			mat4 scale = glm::scale(mat4(), vec3((float)i / 100));
+			mat4 translate = glm::translate(mat4(), vec3(((float)i / (float)renderCount -1.0f), waveOffset, 0));
+			mat4 rotate = glm::rotate(mat4(), 0.0f, vec3(xRotation, yRotation, 1));
+			mat4 scale = glm::scale(mat4(), vec3(2, 1, 1));
 
 			mat4 model = translate * rotate * scale;
 			glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
+			glDrawArrays(renderModes[GL_TRIANGLES], 0, 3);
 
-			glDrawArrays(renderModes[renderSelection], 0, verticesRendered);
 		}
 	}
 	else if (functionModes[functionSelection] == SQUARE_WAVE)
 	{
-		for (int i = 0; i < renderCount; ++i)
-		{
-			mat4 translate = glm::translate(mat4(), vec3(xRotation, yRotation, (float)i / 100));
-			mat4 rotate = glm::rotate(mat4(), animationTime * 3.14159f * (float)i / 100, vec3(xRotation, yRotation, 1));
-			mat4 scale = glm::scale(mat4(), vec3(zOffset - (float)i / 100));
+		glBufferData(GL_ARRAY_BUFFER, 3 * 27 * sizeof(GLfloat), shark, GL_STATIC_DRAW);
+		mat4 translate = glm::translate(mat4(), vec3(xRotation, yRotation, 1));
+		mat4 rotate = glm::rotate(mat4(), 0.0f, vec3(xRotation, yRotation, 1));
+		mat4 scale = glm::scale(mat4(), vec3(0.5));
 
-			mat4 model = translate * rotate * scale;
-			glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
+		mat4 model = translate * rotate * scale;
+		glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
 
-			glDrawArrays(renderModes[renderSelection], 0, 3);
-		}
+		glDrawArrays(renderModes[Triangles], 0, 21);
+
+		translate = glm::translate(mat4(), vec3(xRotation, yRotation + sin(time), 1));
+		model = translate * rotate * scale;
+		glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
+
+		glDrawArrays(renderModes[Triangles], 21, 6);
 	}
 
 	glBindVertexArray(0);
@@ -368,8 +421,8 @@ void initilizeWindow()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_BLEND);
+	glEnable(GL_MULTISAMPLE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glLineWidth(3);
 	glPointSize(5);
 	glClearColor(0.2f, 0.2f, 0.2f, 1);
 

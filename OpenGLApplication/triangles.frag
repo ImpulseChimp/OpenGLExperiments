@@ -9,5 +9,5 @@ in float zLoc;
 void
 main()
 {
-	fColor = vec4(sin(xLoc), cos(yLoc), zLoc, 1.0);
+	fColor = vec4(xLoc + 0.5f, yLoc + 0.25f, zLoc, 1.0);
 }
