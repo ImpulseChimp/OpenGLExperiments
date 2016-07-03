@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <stdio.h>
+#include "LoadShaders.h"
 
 using namespace std;
 using namespace glm;
@@ -146,22 +147,16 @@ void redrawScreen(GLFWwindow* window)
 
 	glBindVertexArray(vaoID[Triangles]);
 
-	if (functionModes[functionSelection] == TRIANGLE_FRACTAL)
-	{
-		glLineWidth(1);
-		glBufferData(GL_ARRAY_BUFFER, 12 * 3 * sizeof(GLfloat), test, GL_STATIC_DRAW);
-		for (int i = 0; i < renderCount; ++i)
-		{
-			mat4 translate = glm::translate(mat4(), vec3(0, 0, ((float)i / 100) - 1));
-			mat4 rotate = glm::rotate(mat4(), animationTime * 3.14159f * (float)i / 100, vec3(0, 0, 1));
-			mat4 scale = glm::scale(mat4(), vec3((float)i / 100));
+	glLineWidth(1);
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), test, GL_STATIC_DRAW);
+	mat4 translate = glm::translate(mat4(), vec3(0, 0, 0));
+	mat4 rotate = glm::rotate(mat4(), 0.0f, vec3(0, 0, 1));
+	mat4 scale = glm::scale(mat4(), vec3(1));
 
-			mat4 model = translate * rotate * scale;
-			glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
+	mat4 model = translate * rotate * scale;
+	glUniformMatrix4fv(modelMatrixId, 1, GL_FALSE, value_ptr(model));
 
-			glDrawArrays(renderModes[renderSelection], 0, verticesRendered);
-		}
-	}
+	glDrawArrays(renderModes[renderSelection], 0, verticesRendered);
 
 	glBindVertexArray(0);
 
@@ -250,7 +245,11 @@ void initializeDependencies(void) {
 	glBufferData(GL_ARRAY_BUFFER, 12 * 3 * sizeof(GLfloat), test, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[ArrayBuffer]);
 
-	//LOAD SHADERS HERE
+	ShaderInfo shaders[] = {
+		{ GL_VERTEX_SHADER, "C:\\Users\\Christopher\\Documents\\visual studio 2015\\Projects\\OpenGLApplication\\OpenGLBase3DWorld\\triangles.vert" },
+		{ GL_FRAGMENT_SHADER, "C:\\Users\\Christopher\\Documents\\visual studio 2015\\Projects\\OpenGLApplication\\OpenGLBase3DWorld\\triangles.frag" },
+		{ GL_NONE, NULL }
+	};
 
 	GLuint program = LoadShaders(shaders);
 	glUseProgram(program);
