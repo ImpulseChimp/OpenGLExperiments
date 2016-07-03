@@ -22,6 +22,7 @@
     <ProjectGuid>{6B8D467E-D301-412C-B8B1-83F012557541}</ProjectGuid>
     <RootNamespace>OpenGLApplication</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>SharkWeekDemo</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
